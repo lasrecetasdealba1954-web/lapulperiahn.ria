@@ -1,4 +1,4 @@
-# backend/server.py (actualizado con variables de entorno para creds de Google)
+# backend/server.py (actualizado con 'request: Request' en endpoints con limiter para compatibilidad con SlowAPI)
 
 from fastapi import FastAPI, Depends, HTTPException, Request, APIRouter, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -89,7 +89,7 @@ async def pulperias_search(request: Request, search: str = ""):
 # Endpoint para obtener URL de auth Google (usando env vars)
 @api_router.get("/auth/google/url")
 @limiter.limit("100/minute")
-async def get_google_auth_url(redirect_uri: str = Query(...)):
+async def get_google_auth_url(request: Request, redirect_uri: str = Query(...)):
     client_id = os.getenv("GOOGLE_CLIENT_ID")
     if not client_id:
         raise HTTPException(status_code=500, detail="Google Client ID not configured")
@@ -109,7 +109,8 @@ from google.oauth2 import id_token  # Import para verificación (si usas en call
 from google.auth.transport import requests as google_requests
 
 @api_router.get("/auth/google/callback")
-async def google_callback(code: str):
+@limiter.limit("100/minute")  # Agregado si quieres limit, sino quita
+async def google_callback(request: Request, code: str):
     client_id = os.getenv("GOOGLE_CLIENT_ID")
     client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
     if not client_id or not client_secret:
@@ -122,7 +123,7 @@ async def google_callback(code: str):
         "code": code,
         "client_id": client_id,
         "client_secret": client_secret,
-        "redirect_uri": "TU_REDIRECT_URI",  # Reemplaza con el real
+        "redirect_uri": "TU_REDIRECT_URI",  # Reemplaza con el real (puede venir de env o query)
         "grant_type": "authorization_code"
     }
     # response = requests.post(token_url, data=payload)  # Descomenta y maneja
