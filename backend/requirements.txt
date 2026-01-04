@@ -1,9 +1,9 @@
 fastapi==0.104.1
 uvicorn==0.24.0.post1
-motor==3.3.2  # Para MongoDB async
-pydantic==2.5.2
+motor==3.3.2
+pydantic==2.4.0  # <-- Cambia esta
 python-dotenv==1.0.0
-resend==0.7.0  # Si usas emails
-slowapi==0.1.9  # Para rate limiting (nuevo)
-fastapi-cache2[redis]==0.2.1  # Para caching (nuevo, usa Redis si escalas; por ahora in-memory)
-redis==5.0.1  # Opcional para caching persistente
+resend==0.7.0
+slowapi==0.1.9
+fastapi-cache2[redis]==0.2.1
+redis==5.0.1
