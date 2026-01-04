@@ -48,6 +48,7 @@ async def create_indexes():
 async def startup_event():
     await create_indexes()
     FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")  # Init caching
+    logger.info("Server started successfully!")
 
 # Modelos (ejemplo, ajusta si necesitas)
 class HealthResponse(BaseModel):
