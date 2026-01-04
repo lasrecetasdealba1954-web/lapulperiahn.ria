@@ -70,7 +70,7 @@ async def global_announcements(request: Request):
 @app.get("/api/products")
 @cache(expire=300)  # Cache searches
 @limiter.limit("100/minute")
-async def products_search(search: str = "", request: Request):
+async def products_search(request: Request, search: str = ""):
     query = {"name": {"$regex": search, "$options": "i"}} if search else {}
     products = await db.products.find(query).to_list(100)
     return products
@@ -78,7 +78,7 @@ async def products_search(search: str = "", request: Request):
 @app.get("/api/pulperias")
 @cache(expire=300)
 @limiter.limit("100/minute")
-async def pulperias_search(search: str = "", request: Request):
+async def pulperias_search(request: Request, search: str = ""):
     query = {"name": {"$regex": search, "$options": "i"}} if search else {}
     pulperias = await db.pulperias.find(query).to_list(100)
     return pulperias
