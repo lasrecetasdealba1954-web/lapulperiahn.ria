@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException, Request
+# backend/server.py (actualizado con variables de entorno para creds de Google)
+
+from fastapi import FastAPI, Depends, HTTPException, Request, APIRouter, Query
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -16,7 +18,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(docs_url="/api/docs")  # Habilita Swagger para testing
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -58,41 +60,40 @@ class HealthResponse(BaseModel):
 async def health(request: Request):
     return {"status": "healthy"}
 
-@app.get("/api/global-announcements")
+# Router para endpoints API (incluyendo auth)
+api_router = APIRouter()
+
+@api_router.get("/global-announcements")
 @cache(expire=300)
 @limiter.limit("100/minute")
 async def global_announcements(request: Request):
     announcements = await db.global_announcements.find().to_list(100)
     return announcements
 
-@app.get("/api/products")
+@api_router.get("/products")
 @cache(expire=300)
 @limiter.limit("100/minute")
-async def products_search(request: Request, search: str = ""):  # FIX: request primero
+async def products_search(request: Request, search: str = ""):
     query = {"name": {"$regex": search, "$options": "i"}} if search else {}
     products = await db.products.find(query).to_list(100)
     return products
 
-@app.get("/api/pulperias")
+@api_router.get("/pulperias")
 @cache(expire=300)
 @limiter.limit("100/minute")
-async def pulperias_search(request: Request, search: str = ""):  # FIX: request primero
+async def pulperias_search(request: Request, search: str = ""):
     query = {"name": {"$regex": search, "$options": "i"}} if search else {}
     pulperias = await db.pulperias.find(query).to_list(100)
     return pulperias
 
-# Agrega aquí tus otros endpoints (auth, email, etc.) tal como estaban
-from fastapi import APIRouter, Query
-from google.oauth2 import id_token  # O usa librería apropiada para OAuth
-from google.auth.transport import requests as google_requests
-
-api_router = APIRouter(prefix="/api")  # Prefix para todas las rutas API
-
+# Endpoint para obtener URL de auth Google (usando env vars)
 @api_router.get("/auth/google/url")
-@limiter.limit("100/minute")  # Opcional: Agrega limiter si quieres
+@limiter.limit("100/minute")
 async def get_google_auth_url(redirect_uri: str = Query(...)):
-    # Lógica para generar URL de OAuth (ejemplo simple; ajusta con tus creds)
     client_id = os.getenv("GOOGLE_CLIENT_ID")
+    if not client_id:
+        raise HTTPException(status_code=500, detail="Google Client ID not configured")
+    
     auth_url = (
         f"https://accounts.google.com/o/oauth2/v2/auth?"
         f"client_id={client_id}&"
@@ -103,14 +104,34 @@ async def get_google_auth_url(redirect_uri: str = Query(...)):
     )
     return {"auth_url": auth_url}
 
-# Agrega callback si falta
+# Endpoint de callback (ajusta según tu lógica; usa env var para secret si necesitas)
+from google.oauth2 import id_token  # Import para verificación (si usas en callback)
+from google.auth.transport import requests as google_requests
+
 @api_router.get("/auth/google/callback")
 async def google_callback(code: str):
-    # Lógica para manejar code, obtener token, etc.
-    return {"message": "Auth successful"}
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=500, detail="Google credentials not configured")
+    
+    # Lógica de intercambio de code por token (ejemplo placeholder; implementa según necesidades)
+    # Por ejemplo: Usa requests para post a Google token endpoint
+    token_url = "https://oauth2.googleapis.com/token"
+    payload = {
+        "code": code,
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "redirect_uri": "TU_REDIRECT_URI",  # Reemplaza con el real
+        "grant_type": "authorization_code"
+    }
+    # response = requests.post(token_url, data=payload)  # Descomenta y maneja
+    return {"message": "Auth successful"}  # Placeholder; actualiza con lógica real
 
-# Incluye el router en la app
-app.include_router(api_router)
+# Incluye el router en la app con prefix /api
+app.include_router(api_router, prefix="/api")
+
+# Agrega aquí tus otros endpoints (email, etc.) si los tienes
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
