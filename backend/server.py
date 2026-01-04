@@ -82,6 +82,35 @@ async def pulperias_search(request: Request, search: str = ""):  # FIX: request 
     return pulperias
 
 # Agrega aquí tus otros endpoints (auth, email, etc.) tal como estaban
+from fastapi import APIRouter, Query
+from google.oauth2 import id_token  # O usa librería apropiada para OAuth
+from google.auth.transport import requests as google_requests
+
+api_router = APIRouter(prefix="/api")  # Prefix para todas las rutas API
+
+@api_router.get("/auth/google/url")
+@limiter.limit("100/minute")  # Opcional: Agrega limiter si quieres
+async def get_google_auth_url(redirect_uri: str = Query(...)):
+    # Lógica para generar URL de OAuth (ejemplo simple; ajusta con tus creds)
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    auth_url = (
+        f"https://accounts.google.com/o/oauth2/v2/auth?"
+        f"client_id={client_id}&"
+        f"redirect_uri={redirect_uri}&"
+        f"response_type=code&"
+        f"scope=email profile&"
+        f"access_type=offline"
+    )
+    return {"auth_url": auth_url}
+
+# Agrega callback si falta
+@api_router.get("/auth/google/callback")
+async def google_callback(code: str):
+    # Lógica para manejar code, obtener token, etc.
+    return {"message": "Auth successful"}
+
+# Incluye el router en la app
+app.include_router(api_router)
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
