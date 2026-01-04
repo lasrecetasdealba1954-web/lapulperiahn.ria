@@ -1,10 +1,14 @@
+# backend/requirements.txt (actualizado con paquete para Google OAuth)
+
 fastapi==0.104.1
 uvicorn==0.24.0.post1
 motor==3.3.2
-pydantic==2.5.2 
-python-dotenv==1.0.0
-resend==0.7.0
-slowapi==0.1.9
-fastapi-cache2[redis]==0.2.1
-redis==4.6.0 
 pymongo==4.6.3
+pydantic==2.5.2
+slowapi==0.1.9
+fastapi-cache2==0.2.1
+redis==4.6.0  # Si usas Redis para caché avanzado
+resend==0.7.0  # Para emails
+python-dotenv==1.0.0
+google-auth-oauthlib==1.0.0  # Nuevo: Para soporte de Google OAuth
+requests==2.31.0  # Para llamadas HTTP en callback si necesitas
