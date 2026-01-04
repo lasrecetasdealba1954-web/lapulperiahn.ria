@@ -44,36 +44,36 @@ const PulperiaLogo = () => (
           <stop offset="100%" stopColor="#78350F"/>
         </linearGradient>
       </defs>
-      
+     
       <rect x="10" y="15" width="80" height="14" rx="3" fill="url(#roofGrad)" filter="url(#glow)"/>
       <rect x="15" y="18" width="70" height="8" rx="2" fill="#B91C1C" opacity="0.7"/>
-      
-      <path d="M10 32 Q22 24 34 32 Q46 40 58 32 Q70 24 82 32 Q88 28 90 32" 
+     
+      <path d="M10 32 Q22 24 34 32 Q46 40 58 32 Q70 24 82 32 Q88 28 90 32"
             fill="none" stroke="url(#roofGrad)" strokeWidth="5" strokeLinecap="round" filter="url(#glow)"/>
-      
+     
       <rect x="15" y="38" width="70" height="48" rx="3" fill="url(#wallGrad)"/>
       <rect x="15" y="38" width="70" height="48" rx="3" fill="none" stroke="#B45309" strokeWidth="1.5"/>
-      
+     
       <rect x="22" y="46" width="18" height="16" rx="2" fill="#1F2937"/>
       <rect x="22" y="46" width="18" height="16" rx="2" fill="none" stroke="#FCD34D" strokeWidth="0.5"/>
       <line x1="31" y1="46" x2="31" y2="62" stroke="#FCD34D" strokeWidth="1.5"/>
       <line x1="22" y1="54" x2="40" y2="54" stroke="#FCD34D" strokeWidth="1.5"/>
       <rect x="23" y="47" width="6" height="6" rx="1" fill="rgba(253, 224, 71, 0.3)"/>
-      
+     
       <rect x="60" y="46" width="18" height="16" rx="2" fill="#1F2937"/>
       <rect x="60" y="46" width="18" height="16" rx="2" fill="none" stroke="#FCD34D" strokeWidth="0.5"/>
       <line x1="69" y1="46" x2="69" y2="62" stroke="#FCD34D" strokeWidth="1.5"/>
       <line x1="60" y1="54" x2="78" y2="54" stroke="#FCD34D" strokeWidth="1.5"/>
       <rect x="61" y="47" width="6" height="6" rx="1" fill="rgba(253, 224, 71, 0.3)"/>
-      
+     
       <path d="M42 86 L42 58 Q50 46 58 58 L58 86 Z" fill="url(#doorGrad)"/>
       <path d="M44 86 L44 60 Q50 50 56 60 L56 86" fill="none" stroke="#D4AF37" strokeWidth="1"/>
       <circle cx="54" cy="72" r="2.5" fill="#FCD34D"/>
-      
+     
       <rect x="10" y="86" width="80" height="6" rx="2" fill="#78350F"/>
       <rect x="10" y="86" width="80" height="2" rx="1" fill="#92400E"/>
     </svg>
-    
+   
     <div className="absolute -top-1 -right-1">
       <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
     </div>
@@ -83,9 +83,9 @@ const PulperiaLogo = () => (
 const LandingPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  
+ 
   const hasSeenDisclaimer = localStorage.getItem('disclaimer_seen') === 'true';
-  
+ 
   const [showDisclaimer, setShowDisclaimer] = useState(!hasSeenDisclaimer);
   const [copied, setCopied] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -103,11 +103,14 @@ const LandingPage = () => {
   const handleLogin = () => {
     if (isLoggingIn) return;
     setIsLoggingIn(true);
+   
+    // Backend URL (cámbialo si tu backend está en el otro link)
+    const BACKEND_URL = 'https://lapulperiahn-ria-uq10.onrender.com/api';
     
-    const returnUrl = window.location.origin;
-    const emergentAuthUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(returnUrl)}`;
-    
-    window.location.href = emergentAuthUrl;
+    const redirectUri = `${window.location.origin}/auth/callback`;
+    const googleAuthUrl = `${BACKEND_URL}/auth/google/url?redirect_uri=${encodeURIComponent(redirectUri)}`;
+   
+    window.location.href = googleAuthUrl;
   };
 
   const handleDisclaimerClose = () => {
@@ -151,18 +154,13 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
-      {/* Animated Background */}
       <AnimatedBackground />
-      
-      {/* Disclaimer Modal */}
+     
       {showDisclaimer && <DisclaimerModal onClose={handleDisclaimerClose} />}
-
-      {/* Content */}
+      
       <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
           <div className="text-center max-w-md mx-auto">
-            {/* Logo y Título */}
             <div className="flex items-center justify-center gap-4 mb-6 animate-scale-in">
               <PulperiaLogo />
               <div className="text-left">
@@ -171,20 +169,19 @@ const LandingPage = () => {
                 </h1>
               </div>
             </div>
-            
+           
             <p className="text-stone-400 text-lg mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
               ¿Qué deseaba?
             </p>
-            
-            {/* Login Button */}
+           
             <button
               onClick={handleLogin}
               disabled={isLoggingIn}
-              className="group relative overflow-hidden galactic-button text-white font-bold py-4 px-10 rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed animate-scale-in mb-10"
+              className="group relative overflow-hidden galactic-button text-white font-bold py-4 px-10 rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed animate-scale-in mb-4"
               style={{ animationDelay: '0.3s' }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              
+             
               {!isLoggingIn ? (
                 <span className="relative flex items-center gap-3">
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -203,13 +200,17 @@ const LandingPage = () => {
                 </span>
               )}
             </button>
+            
+            {/* Indicador de tipo de autenticación */}
+            <p className="text-sm text-stone-400 mb-10">
+              🔐 Google OAuth Propio
+            </p>
 
-            {/* Cómo Funciona - Integrado */}
+            {/* Resto del contenido (cómo funciona, etc.) */}
             <div className="animate-slide-in" style={{ animationDelay: '0.4s' }}>
               <p className="text-stone-500 text-sm mb-4 uppercase tracking-wider">Cómo funciona</p>
-              
+             
               <div className="grid grid-cols-3 gap-3">
-                {/* Paso 1 */}
                 <div className="glass rounded-2xl p-4 text-center group hover:bg-white/5 transition-all">
                   <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center shadow-lg shadow-red-500/20 mb-3 group-hover:scale-110 transition-transform">
                     <MapPin className="w-6 h-6 text-white" />
@@ -217,8 +218,6 @@ const LandingPage = () => {
                   <h3 className="text-white font-bold text-sm mb-1">Explora</h3>
                   <p className="text-stone-500 text-xs leading-tight">Encuentra pulperías cerca de ti</p>
                 </div>
-
-                {/* Paso 2 */}
                 <div className="glass rounded-2xl p-4 text-center group hover:bg-white/5 transition-all">
                   <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shadow-lg shadow-blue-500/20 mb-3 group-hover:scale-110 transition-transform">
                     <ShoppingBag className="w-6 h-6 text-white" />
@@ -226,8 +225,6 @@ const LandingPage = () => {
                   <h3 className="text-white font-bold text-sm mb-1">Ordena</h3>
                   <p className="text-stone-500 text-xs leading-tight">Agrega productos y haz tu pedido</p>
                 </div>
-
-                {/* Paso 3 */}
                 <div className="glass rounded-2xl p-4 text-center group hover:bg-white/5 transition-all">
                   <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center shadow-lg shadow-green-500/20 mb-3 group-hover:scale-110 transition-transform">
                     <Bell className="w-6 h-6 text-white" />
@@ -236,8 +233,7 @@ const LandingPage = () => {
                   <p className="text-stone-500 text-xs leading-tight">Te avisamos cuando esté listo</p>
                 </div>
               </div>
-
-              {/* Card para dueños de pulpería */}
+              
               <div className="mt-4 glass rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-all">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/20">
                   <Store className="w-5 h-5 text-white" />
@@ -250,10 +246,8 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-
-        {/* Bottom Section */}
+        
         <div className="px-6 pb-8 animate-slide-in" style={{ animationDelay: '0.5s' }}>
-          {/* Social Links */}
           <div className="flex justify-center gap-3 mb-4">
             <a
               href="https://x.com/LaPul_periaHN"
@@ -274,8 +268,7 @@ const LandingPage = () => {
               <span className="text-sm font-medium">Instagram</span>
             </a>
           </div>
-
-          {/* Share Section */}
+          
           <div className="max-w-sm mx-auto">
             <div className="glass rounded-2xl p-3">
               <p className="text-stone-500 text-xs text-center mb-2">Comparte La Pulpería</p>
@@ -298,7 +291,6 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-
           <p className="text-center text-stone-600 text-xs mt-4 flex items-center justify-center gap-2">
             <span>🇭🇳</span>
             <span>Conectando comunidades hondureñas</span>
